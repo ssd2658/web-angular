@@ -1,0 +1,87 @@
+<div class="container">
+    <div class="upload-section">
+      <p-fileUpload 
+        mode="basic" 
+        chooseLabel="Upload Portfolio JSON" 
+        [auto]="true"
+        accept=".json" 
+        (onSelect)="onFileUpload($event)"
+        [maxFileSize]="1000000">
+      </p-fileUpload>
+    </div>
+  
+    @if (data) {
+      <div class="dashboard-container">
+
+        <div class="details-section">
+          <h2>Sector Details</h2>
+          <div class="sector-details">
+            @for (item of sectorSummary; track item.sector) {
+              <div class="sector-card" [style.borderLeft]="'10px solid ' + item.color">
+                <div class="sector-name">{{item.sector}}</div>
+                <div class="sector-value" [class.positive]="item.value > 0" [class.negative]="item.value < 0">
+                  ₹{{item.value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="chart-section">
+
+          <h2>Sector-wise Performance</h2>
+          <p-chart type="doughnut" 
+            [data]="data" 
+            [options]="options"
+            [style]="{'width': '100%'}">
+        </p-chart>
+        </div>
+        
+      </div>
+
+        <div class="table-section">
+          <p-table [value]="filteredData" [paginator]="true" [rows]="10"
+                   [showCurrentPageReport]="true" [tableStyle]="{'min-width': '50rem'}"
+                   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Company Name</th>
+                <th>Sector</th>
+                <th>Invested Value</th>
+                <th>Current Value</th>
+                <th>P&L</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+              <tr>
+                <td>{{item.CompanyName}}</td>
+                <td>{{item.Sector}}</td>
+                <td>₹{{item.InvestedValue.toLocaleString('en-IN', { maximumFractionDigits: 2 })}}</td>
+                <td>₹{{item.CurrentValue.toLocaleString('en-IN', { maximumFractionDigits: 2 })}}</td>
+                <td [ngStyle]="{'color': calculatePNL(item) >= 0 ? 'green' : 'red'}">
+                  ₹{{calculatePNL(item).toLocaleString('en-IN', { maximumFractionDigits: 2 })}}
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+      
+      </div>
+
+    }
+
+    @if (sectors.length > 0) {
+        <div class="filter-section">
+          <p-multiSelect 
+            [options]="sectors"
+            [(ngModel)]="selectedSectors"
+            [showHeader]="false"
+            [filter]="true"
+            filterPlaceHolder="Search sectors..."
+            placeholder="Select Sectors"
+            (onChange)="onSectorChange()"
+            [style]="{'width': '100%', 'max-width': '400px'}"
+            optionLabel="">
+          </p-multiSelect>
+        </div>
+      }
+    
